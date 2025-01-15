@@ -17,5 +17,14 @@ echo "WireGuard setup complete:"
 sudo wg show
 sudo ip route
 
+# Test connectivity to an external IP
+ping -c 4 8.8.8.8
+
+# Test DNS resolution
+nslookup google.com
+
+# Check public IP (should match the WireGuard server's IP)
+curl ifconfig.me
+
 # Execute CMD
 exec "$@"
