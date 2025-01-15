@@ -1,42 +1,51 @@
 #!/bin/bash
 
-echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+# Enable IP forwarding
+echo "Enabling IP forwarding..."
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward > /dev/null
 
-# Stop WireGuard if running
-# sudo wg-quick down /etc/wireguard/wg0.conf 2>/dev/null || true
+# Clean up any existing configurations
+echo "Cleaning up existing configurations..."
+sudo ip link delete tap0 2>/dev/null || true
+sudo pkill dnsmasq 2>/dev/null || true
 
-# Start WireGuard
-# sudo wg-quick up /etc/wireguard/wg0.conf
-
-# Display status for debugging
-# echo "WireGuard and network setup complete:"
-
-sudo dnsmasq --no-daemon --conf-file=/etc/dnsmasq.conf &
-DNSMASQ_PID=$!
-
+# Create TAP interface
+echo "Creating TAP interface..."
 sudo ip tuntap add dev tap0 mode tap user $(whoami)
 sudo ip link set tap0 up
 sudo ip addr add 192.168.100.1/24 dev tap0
 
+# Configure NAT
+echo "Configuring NAT..."
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo iptables -A FORWARD -i tap0 -o eth0 -j ACCEPT
 sudo iptables -A FORWARD -i eth0 -o tap0 -j ACCEPT
 
+# Install and start dnsmasq for DHCP
+echo "Configuring DHCP server with dnsmasq..."
+sudo bash -c 'cat > /etc/dnsmasq.conf <<EOF
+interface=tap0
+dhcp-range=192.168.100.50,192.168.100.100,12h
+EOF'
 
-sudo ip route
-sudo ip rule show
+sudo dnsmasq --no-daemon --conf-file=/etc/dnsmasq.conf &
+DNSMASQ_PID=$!
 
-sudo ip addr show
-sudo ip route show
+# Display network setup for debugging
+echo "Displaying network configuration for debugging..."
+ip addr show
+ip route show
 sudo iptables -t nat -L -v -n
-sudo wg show
+sudo iptables -L -v -n
 
+# Test connectivity from tap0
+echo "Testing internet connectivity through tap0..."
+curl --interface tap0 -v http://ifconfig.me
+ping -I tap0 -c 4 8.8.8.8
 
-# Check public IP (should match the WireGuard server's IP)
-curl --interface tap0 -v ifconfig.me
+# Wait for user interaction
+echo "Setup complete. Press Ctrl+C to exit and clean up."
 
-# Test connectivity to an external IP
-ping -c 4 8.8.8.8
-
-# Execute CMD
-exec "tail /dev/null"
+# Keep the script running to maintain the environment
+trap "echo 'Cleaning up...'; sudo ip link delete tap0; sudo pkill dnsmasq; exit" SIGINT SIGTERM
+tail -f /dev/null
