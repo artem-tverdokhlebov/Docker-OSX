@@ -6,15 +6,15 @@ sudo wg-quick down /etc/wireguard/wg0.conf 2>/dev/null || true
 # Start WireGuard
 sudo wg-quick up /etc/wireguard/wg0.conf
 
-# Ensure default route is through WireGuard
+# Ensure the default route is through WireGuard
 sudo ip route del default dev eth0 2>/dev/null || true
 sudo ip route add default dev wg0
 
-# Exclude VNC traffic (port 5999) from WireGuard
-sudo ip rule add fwmark 1 table main
+# Exclude traffic to port 5999 from WireGuard
+sudo ip rule add fwmark 1 lookup main
 sudo iptables -t mangle -A OUTPUT -p tcp --dport 5999 -j MARK --set-mark 1
 
-# Ensure that the main routing table is used for traffic marked with 1
+# Flush routing cache
 sudo ip route flush cache
 
 # Display WireGuard status
