@@ -17,8 +17,8 @@ sudo iptables -t nat -A POSTROUTING -o wg0 -s 192.168.100.0/24 -j MASQUERADE
 sudo iptables -A FORWARD -i tap0 -o wg0 -j ACCEPT
 sudo iptables -A FORWARD -i wg0 -o tap0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 
-# Start dnsmasq for DHCP on tap0
-sudo systemctl start dnsmasq
+sudo dnsmasq --no-daemon --conf-file=/etc/dnsmasq.conf &
+DNSMASQ_PID=$!
 
 # Display status for debugging
 echo "WireGuard and network setup complete:"

@@ -374,9 +374,6 @@ RUN echo "interface=tap0" >> /etc/dnsmasq.conf && \
     echo "dhcp-range=192.168.100.2,192.168.100.254,12h" >> /etc/dnsmasq.conf
 USER arch
 
-# Enable and start dnsmasq
-RUN systemctl enable dnsmasq
-
 COPY wireguard/wg_confs/wg0.conf /etc/wireguard/wg0.conf
 
 COPY start-wireguard.sh /start-wireguard.sh
