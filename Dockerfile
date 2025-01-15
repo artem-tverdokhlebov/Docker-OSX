@@ -368,9 +368,11 @@ ENV BASESYSTEM_IMAGE=BaseSystem.img
 RUN yes | sudo pacman -Syu wireguard-tools dnsmasq --noconfirm && sudo pacman -Scc --noconfirm
 
 # Configure dnsmasq
+USER root
 RUN echo "interface=tap0" >> /etc/dnsmasq.conf && \
     echo "bind-interfaces" >> /etc/dnsmasq.conf && \
     echo "dhcp-range=192.168.100.2,192.168.100.254,12h" >> /etc/dnsmasq.conf
+USER arch
 
 # Enable and start dnsmasq
 RUN systemctl enable dnsmasq
