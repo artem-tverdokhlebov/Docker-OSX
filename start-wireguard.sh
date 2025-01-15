@@ -11,6 +11,18 @@ echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
 # Display status for debugging
 # echo "WireGuard and network setup complete:"
 
+sudo dnsmasq --no-daemon --conf-file=/etc/dnsmasq.conf &
+DNSMASQ_PID=$!
+
+sudo ip tuntap add dev tap0 mode tap user $(whoami)
+sudo ip link set tap0 up
+sudo ip addr add 192.168.100.1/24 dev tap0
+
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -A FORWARD -i tap0 -o eth0 -j ACCEPT
+sudo iptables -A FORWARD -i eth0 -o tap0 -j ACCEPT
+
+
 sudo ip route
 sudo ip rule show
 
@@ -19,12 +31,6 @@ sudo ip route show
 sudo iptables -t nat -L -v -n
 sudo wg show
 
-sudo dnsmasq --no-daemon --conf-file=/etc/dnsmasq.conf &
-DNSMASQ_PID=$!
-
-sudo ip tuntap add dev tap0 mode tap user $(whoami)
-sudo ip link set tap0 up
-sudo ip addr add 192.168.100.1/24 dev tap0
 
 # Check public IP (should match the WireGuard server's IP)
 curl --interface tap0 -v ifconfig.me
