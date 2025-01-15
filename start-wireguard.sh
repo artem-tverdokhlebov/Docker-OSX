@@ -23,7 +23,7 @@ sudo wg show
 ping -c 4 8.8.8.8
 
 # Check public IP (should match the WireGuard server's IP)
-curl --interface tap0 -v ifconfig.me
+curl --interface wg0 -v ifconfig.me
 
 # Execute CMD
 exec "tail /dev/null"
