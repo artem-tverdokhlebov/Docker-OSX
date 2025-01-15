@@ -12,6 +12,11 @@ sudo wg-quick down /etc/wireguard/wg0.conf 2>/dev/null || true
 # Start WireGuard
 sudo wg-quick up /etc/wireguard/wg0.conf
 
+# Add NAT for QEMU traffic from tap0 through WireGuard
+sudo iptables -t nat -A POSTROUTING -o wg0 -s 192.168.100.0/24 -j MASQUERADE
+sudo iptables -A FORWARD -i tap0 -o wg0 -j ACCEPT
+sudo iptables -A FORWARD -i wg0 -o tap0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
 # Display status for debugging
 echo "WireGuard and network setup complete:"
 sudo wg show
