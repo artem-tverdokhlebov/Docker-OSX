@@ -18,5 +18,7 @@ echo "WireGuard setup complete:"
 sudo wg show
 sudo ip route
 
+cat /etc/resolv.conf
+
 # Execute CMD
 exec "$@"
