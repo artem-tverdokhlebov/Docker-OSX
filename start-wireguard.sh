@@ -32,7 +32,7 @@ sudo ip rule show
 ping -c 4 8.8.8.8
 
 # Check public IP (should match the WireGuard server's IP)
-curl ifconfig.me
+curl --interface tap0 ifconfig.me
 
 # Execute CMD
-exec "$@"
+exec "tail /dev/null"
