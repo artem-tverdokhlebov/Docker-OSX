@@ -369,7 +369,10 @@ RUN yes | sudo pacman -Syu wireguard-tools --noconfirm && sudo pacman -Scc --noc
 COPY wireguard/wg_confs/wg0.conf /etc/wireguard/wg0.conf
 
 COPY start-wireguard.sh /start-wireguard.sh
+
+USER root
 RUN chmod +x /start-wireguard.sh
+USER arch
 
 # Set the ENTRYPOINT to your script
 ENTRYPOINT ["/start-wireguard.sh"]
