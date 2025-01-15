@@ -21,6 +21,16 @@ sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo iptables -A FORWARD -i tap0 -o eth0 -j ACCEPT
 sudo iptables -A FORWARD -i eth0 -o tap0 -j ACCEPT
 
+# Set default gateway if needed
+echo "Setting up default gateway..."
+DEFAULT_GATEWAY=$(ip route | grep default | awk '{print $3}')
+if [ -z "$DEFAULT_GATEWAY" ]; then
+    echo "Default gateway not set. Adding route via eth0..."
+    sudo ip route add default via $(ip route show dev eth0 | grep -oP '(?<=src )\S+')
+else
+    echo "Default gateway is already set: $DEFAULT_GATEWAY"
+fi
+
 # Install and start dnsmasq for DHCP
 echo "Configuring DHCP server with dnsmasq..."
 sudo bash -c 'cat > /etc/dnsmasq.conf <<EOF
