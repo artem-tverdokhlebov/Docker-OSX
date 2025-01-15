@@ -209,7 +209,7 @@ RUN touch Launch.sh \
     && tee -a Launch.sh <<< '-drive id=InstallMedia,if=none,file=/home/arch/OSX-KVM/BaseSystem.img,format=${BASESYSTEM_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-drive id=MacHDD,if=none,file=${IMAGE_PATH:-/home/arch/OSX-KVM/mac_hdd_ng.img},format=${IMAGE_FORMAT:-qcow2} \' \
     && tee -a Launch.sh <<< '-device ide-hd,bus=sata.4,drive=MacHDD \' \
-    && tee -a Launch.sh <<< '-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \' \
+    && tee -a Launch.sh <<< '-netdev tap,id=net0,ifname=wg0,script=no,downscript=no \' \
     && tee -a Launch.sh <<< '-device ${NETWORKING:-vmxnet3},netdev=net0,id=net0,mac=${MAC_ADDRESS:-52:54:00:09:49:17} \' \
     && tee -a Launch.sh <<< '-vnc 127.0.0.1:${VNC_PORT:-5900} \' \
     && tee -a Launch.sh <<< '-monitor stdio \' \
