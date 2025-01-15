@@ -365,6 +365,20 @@ ENV BASESYSTEM_IMAGE=BaseSystem.img
 # Wireguard integration
 
 # Install WireGuard
+
+# Update and install required packages
+RUN pacman -Sy --noconfirm && \
+    pacman -S --noconfirm base-devel dnsmasq iproute2 iptables && \
+    pacman -Scc --noconfirm
+
+# Configure dnsmasq
+RUN echo "interface=tap0" >> /etc/dnsmasq.conf && \
+    echo "bind-interfaces" >> /etc/dnsmasq.conf && \
+    echo "dhcp-range=192.168.100.2,192.168.100.254,12h" >> /etc/dnsmasq.conf
+
+# Enable and start dnsmasq
+RUN systemctl enable dnsmasq
+
 RUN yes | sudo pacman -Syu wireguard-tools --noconfirm && sudo pacman -Scc --noconfirm
 
 COPY wireguard/wg_confs/wg0.conf /etc/wireguard/wg0.conf
