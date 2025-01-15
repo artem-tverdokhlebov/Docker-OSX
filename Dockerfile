@@ -361,6 +361,21 @@ ENV SHORTNAME=sonoma
 
 ENV BASESYSTEM_IMAGE=BaseSystem.img
 
+# Wireguard integration
+
+# Install WireGuard
+RUN yes | sudo pacman -Syu wireguard-tools --noconfirm && sudo pacman -Scc --noconfirm
+
+COPY wireguard/wg_confs/wg0.conf /etc/wireguard/wg0.conf
+
+COPY start-wireguard.sh /start-wireguard.sh
+RUN chmod +x /start-wireguard.sh
+
+# Set the ENTRYPOINT to your script
+ENTRYPOINT ["/start-wireguard.sh"]
+
+# END
+
 CMD ! [[ -e "${BASESYSTEM_IMAGE:-BaseSystem.img}" ]] \
         && printf '%s\n' "No BaseSystem.img available, downloading ${SHORTNAME}" \
         && make \
