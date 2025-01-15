@@ -365,13 +365,7 @@ ENV BASESYSTEM_IMAGE=BaseSystem.img
 # Wireguard integration
 
 # Install WireGuard
-
-USER root
-
-# Update and install required packages
-RUN pacman -Sy --noconfirm && \
-    pacman -S --noconfirm base-devel dnsmasq iproute2 iptables && \
-    pacman -Scc --noconfirm
+RUN yes | sudo pacman -Syu wireguard-tools dnsmasq --noconfirm && sudo pacman -Scc --noconfirm
 
 # Configure dnsmasq
 RUN echo "interface=tap0" >> /etc/dnsmasq.conf && \
@@ -381,14 +375,12 @@ RUN echo "interface=tap0" >> /etc/dnsmasq.conf && \
 # Enable and start dnsmasq
 RUN systemctl enable dnsmasq
 
-RUN yes | sudo pacman -Syu wireguard-tools --noconfirm && sudo pacman -Scc --noconfirm
-
 COPY wireguard/wg_confs/wg0.conf /etc/wireguard/wg0.conf
 
 COPY start-wireguard.sh /start-wireguard.sh
 
+USER root
 RUN chmod +x /start-wireguard.sh
-
 USER arch
 
 # Set the ENTRYPOINT to your script
